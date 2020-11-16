@@ -21,10 +21,7 @@ public class DeckOfCards
          System.out.print("How many hands? (1-10, please): ");
          input = keyboard.nextLine();
       }
-      while (!(input.equals("1") || input.equals("2") || input.equals("3") 
-            || input.equals("4") || input.equals("5") || input.equals("6") 
-            || input.equals("7") || input.equals("8") || input.equals("9") 
-            || input.equals("10")));
+      while (!input.matches("^[1-9]|10$")); //RegEx checks valid values (1-10)
       // Create X amount of hands
       int players = Integer.valueOf(input);
       Hand hands[] = new Hand[players];
@@ -35,19 +32,13 @@ public class DeckOfCards
       }
       // Create a 52 card deck
       Deck deckOfCards = new Deck();
-      // Deal the cards to the hands, 1 card per hand over and over until we are
-      // out of cards
-      for (int x = 0; x < 52;)
-      {
-         int y = 0;
-         do
-         {
-            hands[y].takeCard(deckOfCards.dealCard());
-            y++;
-            x++;
-         }
-         while (y < players && x < 52);
+      // Deal the cards to the hands, 1 card per hand over and over 
+      // until we are out of cards
+      int sizeOfDeck = deckOfCards.getTopCard();
+      for(int i = 0; i < sizeOfDeck; i++) {
+         hands[i % players].takeCard(deckOfCards.dealCard());
       }
+      
       // Display
       System.out.println("\nHands from the UNSHUFFLED deck:");
       for (Hand hand : hands)
@@ -62,17 +53,9 @@ public class DeckOfCards
       deckOfCards.init(1);
       deckOfCards.shuffle();
       // Deal the cards to the hands (same amount of hands), 1 card per hand
-      // over and over untill we are out of cards
-      for (int x = 0; x < 52;)
-      {
-         int y = 0;
-         do
-         {
-            hands[y].takeCard(deckOfCards.dealCard());
-            y++;
-            x++;
-         }
-         while (y < players && x < 52);
+      // over and over until we are out of cards
+      for(int i = 0; i < sizeOfDeck; i++) {
+         hands[i % players].takeCard(deckOfCards.dealCard());
       }
       // Display
       System.out.println("\nHands from the SHUFFLED deck:");
@@ -174,19 +157,24 @@ class Card
    // check if suit and value are valid values
    private boolean isValid(char value, Suit suit)
    {
-      if (suit.equals(suit.clubs) || suit.equals(suit.diamonds) ||
-            suit.equals(suit.hearts) || suit.equals(suit.spades))
-      {
-         if (value == 'A' || value == '2' || value == '3' || value == '4' ||
-               value == '5' || value == '6' || value == '7' || value == '8' ||
-               value == '9' || value == 'T' || value == 'J' || value == 'Q' ||
-               value == 'K')
-         {
-            return true;
+      //define the valid values and suits
+      char validValues[] = {'K', 'Q', 'J', 'T', 
+            '9', '8', '7', '6', '5', '4', '3', '2', 'A'};
+      Card.Suit validSuit[] = Card.Suit.values();
+      
+      //checks suit. If suit is valid, checks value. if value is valid, returns
+      //true (valid suit and value). Else, returns false.
+      for(int i = 0; i < validSuit.length; i++) {
+         if (suit == validSuit[i]) {
+            for(int j = 0; j < validValues.length; j++) {
+               if(value == validValues[j]) {
+                  return true;
+               }
+            }
          }
       }
 
-      return false;
+      return false;     
    }
 }
 
@@ -196,73 +184,51 @@ class Card
 
 class Hand
 {
-   public final int MAX_CARDS;
-
+   // initialize class variables
+   public final int MAX_CARDS = 52;
+   
+   // declare instance variables
    private Card[] myCards;
    private int numCards;
 
    // default constructor
    public Hand()
    {
-      MAX_CARDS = 75;
       numCards = 0;
+      myCards = new Card[MAX_CARDS];
    }
 
-   // removes all cards by setting array to null
+   // "removes" all cards by setting numCards to 0
    public void resetHand()
    {
-      myCards = null;
       numCards = 0;
    }
 
    // this will return true if a card was able to be added, and false otherwise
    public boolean takeCard(Card card)
    {
-      // if the added card doesn't make the deck surpass the max, add it. Else,
-      // return false
-      if (numCards < 75)
+      // if the added card doesn't make the deck surpass the max, add it
+      // and return true. Else, return false
+      if (numCards < MAX_CARDS)
       {
-         // makes a temp array of increased size to add the card to
-         Card[] moreCards = new Card[numCards + 1];
-         // copy over the entire array, and add the card at the end
-         for (int i = 0; i <= numCards; i++)
-         {
-            if (i != numCards)
-               moreCards[i] = myCards[i];
-            else
-               moreCards[i] = card;
-         }
-         // set the deck array to the temp array and return true
-         myCards = moreCards;
+         Card cardClone = new Card(card.getValue(), card.getSuit());
+         myCards[numCards] = cardClone;
          numCards++;
-
          return true;
       }
       else
          return false;
    }
 
-   // playCard will take the first card element in the array myCards, remove it,
+   // playCard will take the top card element in the array myCards, remove it,
    // and return it
    public Card playCard()
    {
-      // makes a temp array of decrease size to subtract the top card from
+      // returns top card and reduces numCards by 1
       if (numCards > 0)
       {
-         Card[] lessCards = new Card[numCards - 1];
-         // take the top card to later return
-         Card topCard = myCards[numCards - 1];
-         // assign each variable in the temp array with the variable one spot
-         // ahead in myCards
-         for (int i = 0; i < (numCards - 1); i++)
-         {
-            lessCards[i] = myCards[i];
-         }
-         // set the deck array to the temp array and return the topcard
-         myCards = lessCards;
-         numCards--;
-
-         return topCard;
+         numCards--; // remove card first to provide correct index
+         return myCards[numCards];
       }
       return new Card('d', Card.Suit.hearts);
    }
@@ -352,18 +318,18 @@ class Deck
          // this will be how big our array of cards will be and we allocate
          // space for a topCard amount of cards.
          topCard = numPacks * 52;
-         cards = new Card[getTopCard()];
+         cards = new Card[topCard];
 
          // iterates through the cards array and initialize them to a card in
          // masterPack.
-         for (int iterator = 0; iterator < getTopCard(); iterator++)
+         for (int i = 0; i < topCard; i++)
          {
-            // assigns cards in the current iterator to a new card using the
-            // values and suit from masterPack. masterPack's iterator is
+            // assigns cards in the current i to a new card using the
+            // values and suit from masterPack. masterPack's i is
             // modulo 52 because masterPack is an array of size 52 but cards
             // can be multiples of that.
-            cards[iterator] = new Card(masterPack[(iterator % 52)].getValue(),
-                  masterPack[(iterator % 52)].getSuit());
+            cards[i] = new Card(masterPack[(i % 52)].getValue(),
+                  masterPack[(i % 52)].getSuit());
          }
       }
    }
@@ -371,21 +337,21 @@ class Deck
    // function for shuffling cards
    public void shuffle()
    {
-      // iterator starts at the last card which is topCard - 1 and decrements
+      // i starts at the last card which is topCard - 1 and decrements
       // till we've gone through every card
 
-      for (int iterator = getTopCard() - 1; iterator > 0; iterator--)
+      for (int i = topCard - 1; i > 0; i--)
       {
          // uses math.rand but type cast to int since Math.random returns a
          // double. We use topCards value because we are randomizing and want
          // the number used to be between the amount of cards in the deck.
-         int randomizer = (int) (Math.random() * getTopCard());
+         int randomizer = (int) (Math.random() * topCard);
          // we hold the value in placeHolder and then place the value in
-         // the randomizer location into the iterator location. We then put the
+         // the randomizer location into the i location. We then put the
          // value in placeholder into where the randomizer is currently located
          // All of this is to swap spaces between cards.
-         Card placeHolder = cards[iterator];
-         cards[iterator] = cards[randomizer];
+         Card placeHolder = cards[i];
+         cards[i] = cards[randomizer];
          cards[randomizer] = placeHolder;
       }
    }
@@ -394,14 +360,14 @@ class Deck
    public Card dealCard()
    {
       // checks to see if the topCard is not 0. i.e is the deck empty
-      if (getTopCard() > 0)
+      if (topCard > 0)
       {
          // decrement topCard because we are "removing" the card from the deck
          // we decrement first because if the max array is 104 then topCard is
          // 104 and we will run into an error
          topCard--;
          // return the current top Card
-         return inspectCard(getTopCard());
+         return inspectCard(topCard);
       }
       // returns a card that is not valid if topCard is 0
       else
@@ -430,151 +396,26 @@ class Deck
    // function to create our masterPack
    private static void allocateMasterPack()
    {
-      // checks to see if the masterPack is pointing to a null location. If not
-      // the function does nothing. Otherwise, it creates a new masterPack of 52
-      // cards.
-      if (masterPack == null)
-      {
-         // creates space for 52 new Card objects in masterPack
+      if(masterPack == null) {
+         //Initialize masterpack
          masterPack = new Card[52];
-
-         // iterates through each card object and assign them a card
-         for (int i = 0; i < 52; i++)
-         {
-            switch (i % 13)
-            {
-            case 1:
-               if ((i / 13) == 0)
-                  masterPack[i] = new Card('2', Card.Suit.hearts);
-               else if ((i / 13) == 1)
-                  masterPack[i] = new Card('2', Card.Suit.clubs);
-               else if ((i / 13) == 2)
-                  masterPack[i] = new Card('2', Card.Suit.diamonds);
-               else
-                  masterPack[i] = new Card('2', Card.Suit.spades);
-               break;
-            case 2:
-               if ((i / 13) == 0)
-                  masterPack[i] = new Card('3', Card.Suit.hearts);
-               else if ((i / 13) == 1)
-                  masterPack[i] = new Card('3', Card.Suit.clubs);
-               else if ((i / 13) == 2)
-                  masterPack[i] = new Card('3', Card.Suit.diamonds);
-               else
-                  masterPack[i] = new Card('3', Card.Suit.spades);
-               break;
-            case 3:
-               if ((i / 13) == 0)
-                  masterPack[i] = new Card('4', Card.Suit.hearts);
-               else if ((i / 13) == 1)
-                  masterPack[i] = new Card('4', Card.Suit.clubs);
-               else if ((i / 13) == 2)
-                  masterPack[i] = new Card('4', Card.Suit.diamonds);
-               else
-                  masterPack[i] = new Card('4', Card.Suit.spades);
-               break;
-            case 4:
-               if ((i / 13) == 0)
-                  masterPack[i] = new Card('5', Card.Suit.hearts);
-               else if ((i / 13) == 1)
-                  masterPack[i] = new Card('5', Card.Suit.clubs);
-               else if ((i / 13) == 2)
-                  masterPack[i] = new Card('5', Card.Suit.diamonds);
-               else
-                  masterPack[i] = new Card('5', Card.Suit.spades);
-               break;
-            case 5:
-               if ((i / 13) == 0)
-                  masterPack[i] = new Card('6', Card.Suit.hearts);
-               else if ((i / 13) == 1)
-                  masterPack[i] = new Card('6', Card.Suit.clubs);
-               else if ((i / 13) == 2)
-                  masterPack[i] = new Card('6', Card.Suit.diamonds);
-               else
-                  masterPack[i] = new Card('6', Card.Suit.spades);
-               break;
-            case 6:
-               if ((i / 13) == 0)
-                  masterPack[i] = new Card('7', Card.Suit.hearts);
-               else if ((i / 13) == 1)
-                  masterPack[i] = new Card('7', Card.Suit.clubs);
-               else if ((i / 13) == 2)
-                  masterPack[i] = new Card('7', Card.Suit.diamonds);
-               else
-                  masterPack[i] = new Card('7', Card.Suit.spades);
-               break;
-            case 7:
-               if ((i / 13) == 0)
-                  masterPack[i] = new Card('8', Card.Suit.hearts);
-               else if ((i / 13) == 1)
-                  masterPack[i] = new Card('8', Card.Suit.clubs);
-               else if ((i / 13) == 2)
-                  masterPack[i] = new Card('8', Card.Suit.diamonds);
-               else
-                  masterPack[i] = new Card('8', Card.Suit.spades);
-               break;
-            case 8:
-               if ((i / 13) == 0)
-                  masterPack[i] = new Card('9', Card.Suit.hearts);
-               else if ((i / 13) == 1)
-                  masterPack[i] = new Card('9', Card.Suit.clubs);
-               else if ((i / 13) == 2)
-                  masterPack[i] = new Card('9', Card.Suit.diamonds);
-               else
-                  masterPack[i] = new Card('9', Card.Suit.spades);
-               break;
-            case 9:
-               if ((i / 13) == 0)
-                  masterPack[i] = new Card('T', Card.Suit.hearts);
-               else if ((i / 13) == 1)
-                  masterPack[i] = new Card('T', Card.Suit.clubs);
-               else if ((i / 13) == 2)
-                  masterPack[i] = new Card('T', Card.Suit.diamonds);
-               else
-                  masterPack[i] = new Card('T', Card.Suit.spades);
-               break;
-            case 10:
-               if ((i / 13) == 0)
-                  masterPack[i] = new Card('J', Card.Suit.hearts);
-               else if ((i / 13) == 1)
-                  masterPack[i] = new Card('J', Card.Suit.clubs);
-               else if ((i / 13) == 2)
-                  masterPack[i] = new Card('J', Card.Suit.diamonds);
-               else
-                  masterPack[i] = new Card('J', Card.Suit.spades);
-               break;
-            case 11:
-               if ((i / 13) == 0)
-                  masterPack[i] = new Card('Q', Card.Suit.hearts);
-               else if ((i / 13) == 1)
-                  masterPack[i] = new Card('Q', Card.Suit.clubs);
-               else if ((i / 13) == 2)
-                  masterPack[i] = new Card('Q', Card.Suit.diamonds);
-               else
-                  masterPack[i] = new Card('Q', Card.Suit.spades);
-               break;
-            case 12:
-               if ((i / 13) == 0)
-                  masterPack[i] = new Card('K', Card.Suit.hearts);
-               else if ((i / 13) == 1)
-                  masterPack[i] = new Card('K', Card.Suit.clubs);
-               else if ((i / 13) == 2)
-                  masterPack[i] = new Card('K', Card.Suit.diamonds);
-               else
-                  masterPack[i] = new Card('K', Card.Suit.spades);
-               break;
-            default:
-               if ((i / 13) == 0)
-                  masterPack[i] = new Card('A', Card.Suit.hearts);
-               else if ((i / 13) == 1)
-                  masterPack[i] = new Card('A', Card.Suit.clubs);
-               else if ((i / 13) == 2)
-                  masterPack[i] = new Card('A', Card.Suit.diamonds);
-               else
-                  masterPack[i] = new Card('A', Card.Suit.spades);
+         
+         //Initialize arrays for valid values and suites.
+         char validValues[] = {'K', 'Q', 'J', 'T', 
+               '9', '8', '7', '6', '5', '4', '3', '2', 'A'};
+         Card.Suit validSuit[] = Card.Suit.values();
+         
+         // Assigns each suite
+         int index = 0;
+         for(int suit = 0; suit < validSuit.length; suit++) {
+            // Maps values to a suite and creates cards with those values
+            for(int value = 0; value < validValues.length; value++) {
+               masterPack[index] = 
+                     new Card(validValues[value], validSuit[suit]);
+               index++;
             }
          }
-      }
+      } 
    }
 }
 
@@ -658,6 +499,7 @@ class Deck
  2 of hearts / 7 of hearts / 3 of diamonds / K of clubs /
  K of spades / 9 of hearts / J of diamonds / A of hearts /
 **********************END OF PHASE 3 OUTPUT ******************/
+
 /*********************PHASE 4 OUTPUT***************************
 How many hands? (1-10, please): -1
 How many hands? (1-10, please): 0
