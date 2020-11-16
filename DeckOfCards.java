@@ -1,12 +1,12 @@
-//Team Cryptids
+/* Group: Team Cryptids
+ * Authors: Emerald Kunkle, Bryan Aguiar, Gabriel De Leon, Alberto Lucas 
+ * Class: CST338
+ * Date: 11/17/2020
+ * 
+ * Program Name: DeckOfCards
+ * Description: 
+ */
 
-//Emerald Kunkle
-//Bryan Aguiar
-//Gabriel De Leon
-//Alberto Lucas  
-
-//Deck Of Cards Assignment
-//11-11-2020 to 11-17-2020
 import java.util.Scanner;
 
 public class DeckOfCards
@@ -22,16 +22,18 @@ public class DeckOfCards
          input = keyboard.nextLine();
       }
       while (!input.matches("^[1-9]|10$")); //RegEx checks valid values (1-10)
+      
       // Create X amount of hands
       int players = Integer.valueOf(input);
       Hand hands[] = new Hand[players];
-
       for (int i = 0; i < players; i++)
       {
          hands[i] = new Hand();
       }
+      
       // Create a 52 card deck
       Deck deckOfCards = new Deck();
+      
       // Deal the cards to the hands, 1 card per hand over and over 
       // until we are out of cards
       int sizeOfDeck = deckOfCards.getTopCard();
@@ -45,6 +47,7 @@ public class DeckOfCards
       {
          System.out.println(hand);
       }
+      
       // Reset the hands, reset the deck, shuffle the deck
       for (int i = 0; i < players; i++)
       {
@@ -52,18 +55,21 @@ public class DeckOfCards
       }
       deckOfCards.init(1);
       deckOfCards.shuffle();
+      
       // Deal the cards to the hands (same amount of hands), 1 card per hand
       // over and over until we are out of cards
       for(int i = 0; i < sizeOfDeck; i++) {
          hands[i % players].takeCard(deckOfCards.dealCard());
       }
+      
       // Display
       System.out.println("\nHands from the SHUFFLED deck:");
       for (Hand hand : hands)
       {
          System.out.println(hand);
       }
-
+      
+      // Close Scanner
       keyboard.close();
    }
 }
@@ -74,26 +80,27 @@ public class DeckOfCards
 
 class Card
 {
+   // Declares the possible suits of a card
    public enum Suit
    {
       clubs, diamonds, hearts, spades
-   };
-
-   private char value;
-   private Suit suit;
-   private boolean errorFlag;
-
-   // default constructor
-   public Card()
-   {
-      value = 'A';
-      suit = Suit.spades;
    }
+
+   // Instance Variables
+   private Suit suit;
+   private char value;
+   private boolean errorFlag;
 
    // constructor if the user instantiates with both value and suit
    public Card(char value, Suit suit)
    {
       set(value, suit);
+   }
+
+   // parameterless constructor
+   public Card()
+   {
+      this('A', Suit.spades);
    }
 
    // constructor if the user instantiates with suit but not value
@@ -108,29 +115,7 @@ class Card
       this(value, Suit.spades);
    }
 
-   @Override
-   public String toString()
-   {
-      if (errorFlag)
-         return "Invalid card! :c\n";
-      else
-         return getValue() + " of " + getSuit();
-   }
-
-   // mutator
-   public boolean set(char value, Suit suit)
-   {
-      this.suit = suit;
-      this.value = value;
-      this.errorFlag = !(isValid(value, suit));
-
-      if (errorFlag)
-         return false;
-      else
-         return true;
-   }
-
-   // accessor for suit (getter)
+   // accessor for suit
    public Suit getSuit()
    {
       return suit;
@@ -148,33 +133,63 @@ class Card
       return errorFlag;
    }
 
+   // mutator
+   public boolean set(char value, Suit suit)
+   {
+      // sets card suit and value
+      this.suit = suit;
+      this.value = value;
+
+      // checks if arguments create a valid card
+      boolean isValidCard = isValid(value, suit);
+
+      // errorFlag is true if the card is not valid
+      errorFlag = !isValidCard;
+
+      return isValidCard;
+   }
+
    // checks if card is same as a reference card
    public boolean equals(Card card)
    {
       return (this.suit == card.suit && this.value == card.value);
    }
 
+   @Override
+   public String toString()
+   {
+      if (errorFlag)
+         return "Invalid card! :c\n";
+      else
+         return value + " of " + suit;
+   }
+
    // check if suit and value are valid values
    private boolean isValid(char value, Suit suit)
    {
-      //define the valid values and suits
-      char validValues[] = {'K', 'Q', 'J', 'T', 
-            '9', '8', '7', '6', '5', '4', '3', '2', 'A'};
-      Card.Suit validSuit[] = Card.Suit.values();
-      
-      //checks suit. If suit is valid, checks value. if value is valid, returns
-      //true (valid suit and value). Else, returns false.
-      for(int i = 0; i < validSuit.length; i++) {
-         if (suit == validSuit[i]) {
-            for(int j = 0; j < validValues.length; j++) {
-               if(value == validValues[j]) {
+      // define the valid values and suits
+      char[] validValues =
+      { 'K', 'Q', 'J', 'T',
+            '9', '8', '7', '6', '5', '4', '3', '2', 'A' };
+      Card.Suit[] validSuits = Card.Suit.values();
+
+      // first loop checks suit. If suit is valid, second loop checks value. if
+      // value is valid, returns true (valid suit & value). Else, returns false
+      for (Suit validSuit : validSuits)
+      {
+         if (suit == validSuit)
+         {
+            for (char validValue : validValues)
+            {
+               if (value == validValue)
+               {
                   return true;
                }
             }
          }
       }
 
-      return false;     
+      return false;
    }
 }
 
@@ -186,7 +201,7 @@ class Hand
 {
    // initialize class variables
    public final int MAX_CARDS = 52;
-   
+
    // declare instance variables
    private Card[] myCards;
    private int numCards;
@@ -198,9 +213,16 @@ class Hand
       myCards = new Card[MAX_CARDS];
    }
 
+   // accessor for numCards
+   public int getNumberOfCards()
+   {
+      return numCards;
+   }
+
    // "removes" all cards by setting numCards to 0
    public void resetHand()
    {
+      myCards = new Card[MAX_CARDS];
       numCards = 0;
    }
 
@@ -211,6 +233,7 @@ class Hand
       // and return true. Else, return false
       if (numCards < MAX_CARDS)
       {
+         // creates card copy to prevent privacy leak
          Card cardClone = new Card(card.getValue(), card.getSuit());
          myCards[numCards] = cardClone;
          numCards++;
@@ -224,13 +247,24 @@ class Hand
    // and return it
    public Card playCard()
    {
-      // returns top card and reduces numCards by 1
       if (numCards > 0)
       {
-         numCards--; // remove card first to provide correct index
-         return myCards[numCards];
+         // removes card from count first in order to use correct index
+         numCards--;
+
+         // creates card copy to prevent privacy leak & nullPointerException
+         Card cardClone = new Card(myCards[numCards].getValue(),
+               myCards[numCards].getSuit());
+
+         // removes card from hand
+         myCards[numCards] = null;
+
+         return cardClone;
       }
-      return new Card('d', Card.Suit.hearts);
+      else
+      {
+         return null;
+      }
    }
 
    // Turns everything into a single string and returns it
@@ -240,32 +274,26 @@ class Hand
       // prints the cards out in a nice and pretty card manner :3
       for (int i = 0; i < numCards; i++)
       {
-         if (i % 5 == 4)
-            returnString = returnString + "\n";
-         if (i != numCards - 1)
-            returnString = returnString + (myCards[i].getValue() + " of " +
+         if (i % 5 == 4) // insert a newline every 5th card
+            returnString += "\n";
+         if (i != numCards - 1) // insert a comma after every card
+            returnString += (myCards[i].getValue() + " of " +
                   myCards[i].getSuit() + ", ");
-         else
-            returnString = returnString + (myCards[i].getValue() + " of " +
+         else // if last card, do not insert a comma
+            returnString += (myCards[i].getValue() + " of " +
                   myCards[i].getSuit());
       }
-      // this sends the cards back as one string
+
       return returnString + " )\n";
    }
 
-   // getter for numCards (accessor)
-   public int getNumberOfCards()
-   {
-      return numCards;
-   }
-
    // inspectCard gets the card at a specific position in the myCards array
-   Card inspectCard(int k)
+   public Card inspectCard(int k)
    {
-      // returns card if spot is valid. Else, return a random card with a true
-      // errorFlag
-      if (k < myCards.length)
-         return myCards[k];
+      // returns card clone (to avoid privacy leak) if spot is valid.
+      // Else, return a random card with a true errorFlag
+      if (k < numCards)
+         return new Card(myCards[k].getValue(), myCards[k].getSuit());
       else
          return new Card('D', Card.Suit.diamonds);
    }
@@ -279,7 +307,7 @@ class Hand
 class Deck
 {
    // dictates the max amount of packs that can be alloted
-   public final int MAX_CARDS = 52 * 6;
+   public final int MAX_CARDS = 6 * 52;
    // holds a static deck of 52 cards
    private static Card[] masterPack;
    // cards will store all the decks by the caller up to 6
@@ -287,24 +315,35 @@ class Deck
    // the current max card of the deck (e.g if 4 then topCard == 208)
    int topCard;
 
-   // Default constructor that calls Deck(int numpacks) with a default value
-   // of 1
+   // constructor that accepts the amount of packs the caller requests
+   public Deck(int numPacks)
+   {
+      // creates the master pack
+      allocateMasterPack();
+
+      // checks to see if numPacks is within MAX_CARDS space
+      if ((numPacks * 52) <= MAX_CARDS)
+      {
+         // calls the function to copy cards from masterPacks to cards
+         init(numPacks);
+      }
+      else
+      {
+         // if invalid numPacks, initialize w/default decks (1)
+         init(1);
+      }
+   }
+
+   // paramaterless constructor - initiates with 1 deck
    public Deck()
    {
       this(1);
    }
 
-   // constructor that accepts the amount of packs the caller requests
-   public Deck(int numPacks)
+   // accessor function for TopCard
+   public int getTopCard()
    {
-      // checks to see if numPacks is within MAX_CARDS space
-      if ((numPacks * 52) <= MAX_CARDS)
-      {
-         // creates the master pack
-         allocateMasterPack();
-         // calls the function to copy cards from masterPacks to cards
-         init(numPacks);
-      }
+      return topCard;
    }
 
    // fills the cards array with cards from the masterPack array according to
@@ -366,186 +405,111 @@ class Deck
          // we decrement first because if the max array is 104 then topCard is
          // 104 and we will run into an error
          topCard--;
-         // return the current top Card
-         return inspectCard(topCard);
+         // creates a copy of the card and removes it from the deck (prevents
+         // privacy leak)
+         Card cardClone = new Card(cards[topCard].getValue(),
+               cards[topCard].getSuit());
+         cards[topCard] = null;
+         // return a copy of the current top Card
+         return cardClone;
       }
-      // returns a card that is not valid if topCard is 0
       else
-         return new Card('E', Card.Suit.spades);
-   }
-
-   // accessor function for TopCard
-   public int getTopCard()
-   {
-      return topCard;
+         return null;
    }
 
    // checks to see if card at location k is valid.
    public Card inspectCard(int k)
    {
-      if (k < cards.length)
+      // returns card clone (to avoid privacy leak) if spot is valid.
+      // Else, return a random card with a true errorFlag
+      if (k < topCard)
       {
-         return cards[k];
+         return new Card(cards[k].getValue(), cards[k].getSuit());
       }
       else
       {
-         return new Card('E', Card.Suit.spades);
+         return new Card('D', Card.Suit.diamonds);
       }
    }
 
    // function to create our masterPack
    private static void allocateMasterPack()
    {
-      if(masterPack == null) {
-         //Initialize masterpack
+      // only runs once when masterPack has not been initialized
+      if (masterPack == null)
+      {
+         // Initialize masterPack
          masterPack = new Card[52];
-         
-         //Initialize arrays for valid values and suites.
-         char validValues[] = {'K', 'Q', 'J', 'T', 
-               '9', '8', '7', '6', '5', '4', '3', '2', 'A'};
-         Card.Suit validSuit[] = Card.Suit.values();
-         
-         // Assigns each suite
+
+         // Initialize arrays for valid values and suites.
+         char[] validValues =
+         { 'K', 'Q', 'J', 'T',
+               '9', '8', '7', '6', '5', '4', '3', '2', 'A' };
+         Card.Suit[] validSuits = Card.Suit.values();
+
+         // Outer loop goes through each suit once
          int index = 0;
-         for(int suit = 0; suit < validSuit.length; suit++) {
-            // Maps values to a suite and creates cards with those values
-            for(int value = 0; value < validValues.length; value++) {
-               masterPack[index] = 
-                     new Card(validValues[value], validSuit[suit]);
+         for (Card.Suit validSuit : validSuits)
+         {
+            // Maps a valid value to each suit and builds a card
+            for (char validValue : validValues)
+            {
+               masterPack[index] = new Card(validValue, validSuit);
                index++;
             }
          }
-      } 
+      }
    }
 }
 
 /*********************PHASE 3 OUTPUT********************************** 
- K of spades / Q of spades / J of spades / T of spades /
- 9 of spades / 8 of spades / 7 of spades / 6 of spades /
- 5 of spades / 4 of spades / 3 of spades / 2 of spades /
- A of spades / K of diamonds / Q of diamonds / J of diamonds /
- T of diamonds / 9 of diamonds / 8 of diamonds / 7 of diamonds /
- 6 of diamonds / 5 of diamonds / 4 of diamonds / 3 of diamonds /
- 2 of diamonds / A of diamonds / K of clubs / Q of clubs /
- J of clubs / T of clubs / 9 of clubs / 8 of clubs /
- 7 of clubs / 6 of clubs / 5 of clubs / 4 of clubs /
- 3 of clubs / 2 of clubs / A of clubs / K of hearts /
- Q of hearts / J of hearts / T of hearts / 9 of hearts /
- 8 of hearts / 7 of hearts / 6 of hearts / 5 of hearts /
- 4 of hearts / 3 of hearts / 2 of hearts / A of hearts /
- K of spades / Q of spades / J of spades / T of spades /
- 9 of spades / 8 of spades / 7 of spades / 6 of spades /
- 5 of spades / 4 of spades / 3 of spades / 2 of spades /
- A of spades / K of diamonds / Q of diamonds / J of diamonds /
- T of diamonds / 9 of diamonds / 8 of diamonds / 7 of diamonds /
- 6 of diamonds / 5 of diamonds / 4 of diamonds / 3 of diamonds /
- 2 of diamonds / A of diamonds / K of clubs / Q of clubs /
- J of clubs / T of clubs / 9 of clubs / 8 of clubs /
- 7 of clubs / 6 of clubs / 5 of clubs / 4 of clubs /
- 3 of clubs / 2 of clubs / A of clubs / K of hearts /
- Q of hearts / J of hearts / T of hearts / 9 of hearts /
- 8 of hearts / 7 of hearts / 6 of hearts / 5 of hearts /
- 4 of hearts / 3 of hearts / 2 of hearts / A of hearts /
- K of diamonds / T of hearts / 7 of hearts / 4 of diamonds /
- 4 of hearts / K of clubs / Q of hearts / 6 of diamonds /
- 8 of diamonds / J of spades / A of diamonds / 8 of spades /
- 6 of clubs / 8 of spades / 7 of diamonds / 4 of clubs /
- K of diamonds / J of hearts / K of spades / J of spades /
- 8 of diamonds / K of clubs / 8 of hearts / 2 of clubs /
- 5 of spades / A of clubs / 7 of diamonds / K of spades /
- 9 of hearts / 3 of diamonds / Q of diamonds / T of diamonds /
- J of diamonds / 9 of hearts / 9 of spades / 2 of diamonds /
- 5 of diamonds / 6 of hearts / 5 of diamonds / 3 of hearts /
- 2 of hearts / 4 of spades / 3 of spades / T of spades /
- Q of diamonds / 5 of hearts / J of clubs / 7 of spades /
- K of hearts / 5 of clubs / 2 of spades / 8 of hearts /
- J of clubs / A of clubs / 8 of clubs / 7 of clubs /
- 7 of clubs / 6 of hearts / A of hearts / 9 of diamonds /
- 2 of diamonds / 7 of spades / J of diamonds / 6 of spades /
- T of hearts / 4 of hearts / K of hearts / 2 of spades /
- T of clubs / Q of clubs / 7 of hearts / 5 of spades /
- 4 of spades / 2 of hearts / Q of spades / 2 of clubs /
- J of hearts / Q of clubs / 3 of diamonds / 6 of spades /
- 3 of clubs / 9 of clubs / Q of hearts / 4 of diamonds /
- 6 of clubs / T of spades / 5 of hearts / 8 of clubs /
- T of clubs / A of spades / A of diamonds / T of diamonds /
- A of spades / 5 of clubs / 3 of spades / 9 of diamonds /
- 9 of clubs / 6 of diamonds / Q of spades / 4 of clubs /
- 3 of clubs / 9 of spades / 3 of hearts / A of hearts /
- K of spades / Q of spades / J of spades / T of spades /
- 9 of spades / 8 of spades / 7 of spades / 6 of spades /
- 5 of spades / 4 of spades / 3 of spades / 2 of spades /
- A of spades / K of diamonds / Q of diamonds / J of diamonds /
- T of diamonds / 9 of diamonds / 8 of diamonds / 7 of diamonds /
- 6 of diamonds / 5 of diamonds / 4 of diamonds / 3 of diamonds /
- 2 of diamonds / A of diamonds / K of clubs / Q of clubs /
- J of clubs / T of clubs / 9 of clubs / 8 of clubs /
- 7 of clubs / 6 of clubs / 5 of clubs / 4 of clubs /
- 3 of clubs / 2 of clubs / A of clubs / K of hearts /
- Q of hearts / J of hearts / T of hearts / 9 of hearts /
- 8 of hearts / 7 of hearts / 6 of hearts / 5 of hearts /
- 4 of hearts / 3 of hearts / 2 of hearts / A of hearts /
- Q of spades / 3 of clubs / 6 of spades / T of hearts /
- T of diamonds / 4 of clubs / 6 of clubs / 4 of diamonds /
- K of diamonds / 9 of diamonds / 7 of spades / A of clubs /
- K of hearts / 5 of diamonds / 8 of spades / A of spades /
- 8 of diamonds / 5 of spades / 8 of hearts / 8 of clubs /
- A of diamonds / Q of hearts / 2 of spades / Q of diamonds /
- J of spades / T of spades / T of clubs / 4 of hearts /
- J of hearts / 9 of spades / 3 of spades / 5 of clubs /
- Q of clubs / 6 of diamonds / 2 of diamonds / 7 of clubs /
- 5 of hearts / J of clubs / 4 of spades / 9 of clubs /
- 6 of hearts / 7 of diamonds / 3 of hearts / 2 of clubs /
- 2 of hearts / 7 of hearts / 3 of diamonds / K of clubs /
- K of spades / 9 of hearts / J of diamonds / A of hearts /
+NEED TO REDO
 **********************END OF PHASE 3 OUTPUT ******************/
 
 /*********************PHASE 4 OUTPUT***************************
-How many hands? (1-10, please): -1
-How many hands? (1-10, please): 0
-How many hands? (1-10, please): 11
-How many hands? (1-10, please): 100
-How many hands? (1-10, please): abc123
+How many hands? (1-10, please): dfg
+How many hands? (1-10, please): 56316
+How many hands? (1-10, please): -1651
 How many hands? (1-10, please): 6
 
 Hands from the UNSHUFFLED deck:
-Hand = ( K of spades, 7 of spades, A of spades, 8 of diamonds, 
-2 of diamonds, 9 of clubs, 3 of clubs, T of hearts, 4 of hearts )
+Hand = ( A of spades, 7 of spades, K of spades, 6 of hearts, 
+Q of hearts, 5 of diamonds, J of diamonds, 4 of clubs, T of clubs )
 
-Hand = ( Q of spades, 6 of spades, K of diamonds, 7 of diamonds, 
-A of diamonds, 8 of clubs, 2 of clubs, 9 of hearts, 3 of hearts )
+Hand = ( 2 of spades, 8 of spades, A of hearts, 7 of hearts, 
+K of hearts, 6 of diamonds, Q of diamonds, 5 of clubs, J of clubs )
 
-Hand = ( J of spades, 5 of spades, Q of diamonds, 6 of diamonds, 
-K of clubs, 7 of clubs, A of clubs, 8 of hearts, 2 of hearts )
+Hand = ( 3 of spades, 9 of spades, 2 of hearts, 8 of hearts, 
+A of diamonds, 7 of diamonds, K of diamonds, 6 of clubs, Q of clubs )
 
-Hand = ( T of spades, 4 of spades, J of diamonds, 5 of diamonds, 
-Q of clubs, 6 of clubs, K of hearts, 7 of hearts, A of hearts )
+Hand = ( 4 of spades, T of spades, 3 of hearts, 9 of hearts, 
+2 of diamonds, 8 of diamonds, A of clubs, 7 of clubs, K of clubs )
 
-Hand = ( 9 of spades, 3 of spades, T of diamonds, 4 of diamonds, 
-J of clubs, 5 of clubs, Q of hearts, 6 of hearts )
+Hand = ( 5 of spades, J of spades, 4 of hearts, T of hearts, 
+3 of diamonds, 9 of diamonds, 2 of clubs, 8 of clubs )
 
-Hand = ( 8 of spades, 2 of spades, 9 of diamonds, 3 of diamonds, 
-T of clubs, 4 of clubs, J of hearts, 5 of hearts )
+Hand = ( 6 of spades, Q of spades, 5 of hearts, J of hearts, 
+4 of diamonds, T of diamonds, 3 of clubs, 9 of clubs )
 
 
 Hands from the SHUFFLED deck:
-Hand = ( K of spades, K of diamonds, 4 of hearts, 8 of hearts, 
-4 of clubs, K of hearts, 2 of hearts, K of clubs, A of diamonds )
+Hand = ( 2 of spades, 6 of clubs, K of diamonds, Q of hearts, 
+6 of hearts, 7 of spades, 6 of diamonds, 6 of spades, 2 of diamonds )
 
-Hand = ( J of hearts, J of clubs, 6 of clubs, 2 of diamonds, 
-Q of diamonds, 3 of hearts, 3 of clubs, 4 of spades, A of clubs )
+Hand = ( 3 of clubs, T of clubs, 3 of hearts, 5 of diamonds, 
+K of spades, 5 of hearts, 2 of hearts, J of clubs, 4 of spades )
 
-Hand = ( Q of clubs, 6 of hearts, T of diamonds, 7 of hearts, 
-T of clubs, Q of hearts, T of hearts, 4 of diamonds, J of diamonds )
+Hand = ( A of diamonds, Q of diamonds, 8 of clubs, A of clubs, 
+5 of clubs, 8 of hearts, 3 of diamonds, J of diamonds, T of spades )
 
-Hand = ( 7 of spades, 9 of clubs, 2 of clubs, A of spades, 
-5 of hearts, 3 of spades, T of spades, Q of spades, 9 of spades )
+Hand = ( 2 of clubs, 9 of spades, T of diamonds, 5 of spades, 
+9 of hearts, 7 of clubs, 8 of diamonds, 7 of hearts, 9 of clubs )
 
-Hand = ( 9 of hearts, 9 of diamonds, 6 of diamonds, J of spades, 
-8 of clubs, 8 of spades, 6 of spades, 2 of spades )
+Hand = ( A of hearts, J of spades, Q of spades, A of spades, 
+J of hearts, 9 of diamonds, 4 of clubs, Q of clubs )
 
-Hand = ( 7 of diamonds, A of hearts, 3 of diamonds, 7 of clubs, 
-5 of clubs, 8 of diamonds, 5 of spades, 5 of diamonds )
+Hand = ( K of clubs, 8 of spades, T of hearts, 7 of diamonds, 
+4 of hearts, K of hearts, 4 of diamonds, 3 of spades )
 
 
 **********************END OF PHASE 4 OUTPUT*******************/
