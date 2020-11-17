@@ -111,7 +111,7 @@ public class Assig3
       
       System.out.println("PHASE 3 TEST BEGIN:");
       // Unshuffled 2-deck test.
-      // Defines 2 decks of cards and outputs the cards.
+      // Creates an unshuffled deck with 2 packs of cards and outputs them.
       Deck myDeck = new Deck(2);
       int myMaxCard = myDeck.getTopCard();
       for (int i = 0; i < myMaxCard; i++)
@@ -122,7 +122,7 @@ public class Assig3
       }
 
       // Shuffled 2-deck test.
-      // Defines 2 decks of cards and outputs the cards.
+      // Creates a deck with 2 packs of cards, shuffles them, and outputs them.
       System.out.println();
       myDeck.init(2);
       myDeck.shuffle();
@@ -134,7 +134,7 @@ public class Assig3
       }
 
       // Unshuffled 1-deck test.
-      // Defines 1 deck of cards and outputs the cards.
+      // Creates an unshuffled deck with 1 pack of cards and outputs them.
       System.out.println();
       myDeck.init(1);
       myMaxCard = myDeck.getTopCard();
@@ -146,7 +146,7 @@ public class Assig3
       }
 
       // Shuffled 1-deck test.
-      // Defines 1 decks of cards and outputs the cards.
+      // Creates a deck with 1 packs of cards, shuffles them, and outputs them.
       System.out.println();
       myDeck.init(1);
       myDeck.shuffle();
