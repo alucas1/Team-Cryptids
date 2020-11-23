@@ -221,6 +221,264 @@ class BarcodeImage implements Cloneable
    public Object clone() throws CloneNotSupportedException
    {
       return (BarcodeImage) super.clone();
+   }  
+}
+
+class DataMatrix implements BarcodeIO
+{
+   public static final char BLACK_CHAR = '*';
+   public static final char WHITE_CHAR = ' ';
+   
+   private BarcodeImage image;
+   private String text;
+   private int actualWidth;
+   private int actualHeight;
+   
+   public DataMatrix()
+   {
+      text = null;
+      image = new BarcodeImage();
+      actualWidth = 0;
+      actualHeight = 0;
+   }
+   public DataMatrix(BarcodeImage image)
+   {
+      scan(image);
+      text = null;
+      
+   }
+   public DataMatrix(String text)
+   {
+      image = new BarcodeImage();
+      readText(text);
    }
    
+   public boolean scan(BarcodeImage image)
+   {
+      if (image == null)
+         return false;
+      try
+      {
+         this.image = (BarcodeImage) image.clone();
+      } catch (CloneNotSupportedException e)
+      {
+      }
+      cleanImage();
+      actualWidth = computeSignalWidth();
+      actualHeight = computeSignalHeight();
+      return true;
+   }
+   
+   public boolean readText(String text)
+   {
+      if (text == null || text.length() > BarcodeImage.MAX_WIDTH)
+         return false;
+      this.text = text;
+      return true;
+   }
+   
+   public boolean generateImageFromText()
+   {
+      if(text == null)
+         return false;
+      
+      int readIndex = 0;
+      
+      for(int y = BarcodeImage.MAX_HEIGHT; y > BarcodeImage.MAX_HEIGHT - 11;y--)
+         image.setPixel(y, 0, true);
+      for(int x = 0; x < text.length() + 1; x++)
+         image.setPixel(BarcodeImage.MAX_HEIGHT - 1, x, true);
+      
+      for(int x = 0; x < text.length() + 2;x++)
+         if(x % 2 == 0)
+            image.setPixel(BarcodeImage.MAX_HEIGHT - 10, x, true);
+      for(int y = BarcodeImage.MAX_HEIGHT; y > BarcodeImage.MAX_HEIGHT - 11;y--)
+         if (y % 2 == 1)
+            image.setPixel(y, text.length() + 1, true);
+      
+      for(int col = 1; col < text.length() + 1; col++)
+      {
+         writeCharToCol(col, text.charAt(readIndex));
+         readIndex++;
+      }
+      
+      actualHeight = computeSignalHeight();
+      actualWidth = computeSignalWidth();
+      return true;
+   }
+   
+   private boolean writeCharToCol(int col, int code)
+   {
+      if(col == BarcodeImage.MAX_WIDTH || col == 0 || code == 0)
+         return false;
+      for(int row = BarcodeImage.MAX_HEIGHT - 2; row > BarcodeImage.MAX_HEIGHT -
+            11; row--)
+      {
+         if(code % 2 == 1)
+            image.setPixel(row, col, true);
+         code /= 2;
+         if(code == 0)
+            break;
+      }
+      
+      return true;
+   }
+   
+   public boolean translateImageToText()
+   {
+      text = "";
+      if (this.image == null)
+      {
+         return false;
+      }
+      for (int i = 1; i < getActualWidth() + 1; i++)
+      {
+         text += readCharFromCol(i);
+      }
+      return true;
+   }
+   
+   private char readCharFromCol(int col)
+   {
+      char output = 0;
+      int exp = 0;
+      for (int row = BarcodeImage.MAX_HEIGHT - 2; 
+         row > BarcodeImage.MAX_HEIGHT - getActualHeight() - 1; row--)
+      {
+         if (image.getPixel(row, col))
+         {
+            output += Math.pow(2, exp);
+         }
+         exp++;
+      }
+      return output;
+   }
+   
+   public void displayTextToConsole()
+   {
+      System.out.println("The message is: " + text);
+   }
+   
+   public void displayImageToConsole()
+   {
+      for (int col = 0; col < getActualWidth() + 4; col++)
+         System.out.print("-");
+      System.out.println();
+      
+      for(int row = BarcodeImage.MAX_HEIGHT - getActualHeight() - 2; row <
+            BarcodeImage.MAX_HEIGHT; row++)
+      {
+         System.out.print('|');
+         for (int col = 0; col < getActualWidth() + 2; col++)
+            System.out.print(image.getPixel(row, col) ? BLACK_CHAR : WHITE_CHAR);
+         System.out.println('|');
+      }
+   }
+      
+   public int getActualWidth()
+   {
+      return actualWidth;
+   }
+   
+   public int getActualHeight()
+   {
+      return actualHeight;
+   }
+   
+   private int computeSignalWidth() 
+   {
+      int width = 0;
+      for (int i = 1; i < BarcodeImage.MAX_WIDTH; i++)
+      {
+         if (image.getPixel(BarcodeImage.MAX_HEIGHT - 1, i))
+         {
+            width++;
+         }
+      }
+      return width - 1;
+   }
+   
+   private int computeSignalHeight()
+   {
+      int height = 0;
+      for (int i = BarcodeImage.MAX_HEIGHT - 1; i >= 0; i--)
+      {
+         if (image.getPixel(i, 0))
+         {
+            height ++;
+         }
+      }
+      return height - 2;
+   }
+   
+   private void cleanImage()
+   {
+      int col = 0;
+      int row = 0;
+      boolean tracker = false;
+      
+      for(col = 0; col < BarcodeImage.MAX_WIDTH; col++)
+      {
+         for (row = 0; row < BarcodeImage.MAX_HEIGHT; row++)
+         {
+            tracker = image.getPixel(row, col);
+            if (tracker)
+               break;
+         }
+         if (tracker)
+            break;
+      }
+      
+      while(tracker)
+      {
+         tracker = image.getPixel(row, col);
+         row++;
+      }
+      
+      moveImageToLowerLeft(col, BarcodeImage.MAX_HEIGHT - row);
+   }
+   
+   private void moveImageToLowerLeft(int rowOffSet, int colOffSet)
+   {
+      shiftImageLeft(rowOffSet);
+      shiftImageDown(colOffSet);
+   }
+   
+   private void shiftImageDown(int offset)
+   {
+      if (offset < 0) 
+      {
+         return;
+      }
+      boolean pixelValue;
+      BarcodeImage tempImage = new BarcodeImage();
+      for (int x = 0; x < BarcodeImage.MAX_WIDTH; x++)
+      {
+         for (int y = 0; y <  BarcodeImage.MAX_HEIGHT; y++)
+         {
+            pixelValue = image.getPixel(y, x);
+            tempImage.setPixel(y + offset + 1, x, pixelValue);
+         }
+      }
+      image = tempImage;
+   }
+   
+   private void shiftImageLeft(int offset)
+   {
+      // test to see if the image needs to be moved at all
+      if (offset < 0) 
+      {
+         return;
+      }
+      boolean pixelValue;
+      for (int x = 0; x < BarcodeImage.MAX_WIDTH; x++)
+      {
+         for (int y = 0; y < BarcodeImage.MAX_HEIGHT; y++)
+         {
+            pixelValue = image.getPixel(y, x);
+            image.setPixel(y, x - offset, pixelValue);
+         }
+      }
+   }  
 }
+   
