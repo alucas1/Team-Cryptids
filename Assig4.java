@@ -1,11 +1,8 @@
 /*******************************************************************************
- * Group: Team Cryptids 
- * Authors: Emerald Kunkle, Bryan Aguiar, Gabriel De Leon,Alberto Lucas 
- * Class: CST338 
- * Date: 11/24/2020
+ * Group: Team Cryptids Authors: Emerald Kunkle, Bryan Aguiar, Gabriel De Leon,
+ * Alberto Lucas Class: CST338 Date: 11/24/2020
  *
- * Program Name: Assig4 
- * Description: 
+ * Program Name: Assig4 Description
  *
  ******************************************************************************/
 
@@ -392,12 +389,14 @@ class DataMatrix implements BarcodeIO
       {
          // left intentionally empty as spec specifies this to remain empty.
       }
+
       // a call to the cleanImage function to shift object to bottom left
       cleanImage();
 
       // compute the actualWidth and actualHeight using compute functions
       actualWidth = computeSignalWidth();
       actualHeight = computeSignalHeight();
+
       return true;
    }
 
@@ -421,7 +420,6 @@ class DataMatrix implements BarcodeIO
       else
       {
          this.text = text;
-         image = new BarcodeImage();
          return true;
       }
    }
@@ -434,6 +432,9 @@ class DataMatrix implements BarcodeIO
     */
    public boolean generateImageFromText()
    {
+      // resets image
+      clearImage();
+
       // tests text to see if there is anything stored
       if (text == null)
       {
@@ -515,16 +516,17 @@ class DataMatrix implements BarcodeIO
     */
    public boolean translateImageToText()
    {
+      // ensures that text has an empty string before translation.
+      text = "";
+
       // tests if image is stored and not null
-      if (this.image == null)
+      if (this.image == null || actualHeight == 0 || actualWidth == 0)
       {
          return false;
       }
-      // ensures that text has an empty string before translation
-      text = "";
 
       // iterate through
-      for (int i = 1; i < getActualWidth() + 1; i++)
+      for (int i = 1; i < actualWidth + 1; i++)
       {
          text += readCharFromCol(i);
       }
@@ -560,25 +562,30 @@ class DataMatrix implements BarcodeIO
     */
    public void displayImageToConsole()
    {
-      // a for loop to add the top line border that matches spec. actualWidth +
-      // 4 because there are or will be two extra borders added to our actual
-      // width
-      for (int col = 0; col < getActualWidth() + 4; col++)
-         System.out.print("-");
-      System.out.println();
-
-      // a for loop that starts above our image and ends at the max_height
-      for (int row = BarcodeImage.MAX_HEIGHT - getActualHeight()
-            - 2; row < BarcodeImage.MAX_HEIGHT; row++)
+      if (image != null & actualWidth != 0 & actualHeight != 0)
       {
-         // prints out the side borders
-         System.out.print('|');
-         // a for loop that prints out a black or white char using a conditional
-         // statement.
-         for (int col = 0; col < getActualWidth() + 2; col++)
-            System.out
-                  .print(image.getPixel(row, col) ? BLACK_CHAR : WHITE_CHAR);
-         System.out.println('|');
+         // a for loop to add the top line border that matches spec. actualWidth
+         // +
+         // 4 because there are or will be two extra borders added to our actual
+         // width
+         for (int col = 0; col < getActualWidth() + 4; col++)
+            System.out.print("-");
+         System.out.println();
+
+         // a for loop that starts above our image and ends at the max_height
+         for (int row = BarcodeImage.MAX_HEIGHT - getActualHeight()
+               - 2; row < BarcodeImage.MAX_HEIGHT; row++)
+         {
+            // prints out the side borders
+            System.out.print('|');
+            // a for loop that prints out a black or white char using a
+            // conditional
+            // statement.
+            for (int col = 0; col < getActualWidth() + 2; col++)
+               System.out
+                     .print(image.getPixel(row, col) ? BLACK_CHAR : WHITE_CHAR);
+            System.out.println('|');
+         }
       }
    }
 
@@ -598,6 +605,8 @@ class DataMatrix implements BarcodeIO
       }
 
       // subtract 2 to ignore open borderline and closed limitation line
+      if (width == 0)
+         return 0;
       return width - 2;
    }
 
@@ -621,6 +630,8 @@ class DataMatrix implements BarcodeIO
       }
 
       // subtract 1 to ignore the top row open borderline
+      if (height == 0)
+         return 0;
       return height - 1;
    }
 
@@ -712,67 +723,74 @@ class DataMatrix implements BarcodeIO
          image = tempImage;
       }
    }
+
+   private void clearImage()
+   {
+      this.image = new BarcodeImage();
+   }
 }
 
+
+
 /********************TEST OUTPUT****************************
- Secret Message: CSUMB CSIT online program is top notch.
- -------------------------------------------
- |* * * * * * * * * * * * * * * * * * * * *|
- |*                                       *|
- |****** **** ****** ******* ** *** *****  |
- |*     *    ******************************|
- |* **    * *        **  *    * * *   *    |
- |*   *    *  *****    *   * *   *  **  ***|
- |*  **     * *** **   **  *    **  ***  * |
- |***  * **   **  *   ****    *  *  ** * **|
- |*****  ***  *  * *   ** ** **  *   * *   |
- |*****************************************|
- Secret Message: You did it!  Great work.  Celebrate.
- ----------------------------------------
- |* * * * * * * * * * * * * * * * * * * |
- |*                                    *|
- |**** *** **   ***** ****   *********  |
- |* ************ ************ **********|
- |** *      *    *  * * *         * *   |
- |***   *  *           * **    *      **|
- |* ** * *  *   * * * **  *   ***   *** |
- |* *           **    *****  *   **   **|
- |****  *  * *  * **  ** *   ** *  * *  |
- |**************************************|
- Secret Message: hello
- ---------
- |* * * *|
- |*     *|
- |****** |
- |*******|
- |*      |
- |** ****|
- |* **** |
- |*    **|
- |* *  * |
- |*******|
- Secret Message: What a great resume builder this is!
- ----------------------------------------
- |* * * * * * * * * * * * * * * * * * * |
- |*                                    *|
- |***** * ***** ****** ******* **** **  |
- |* ************************************|
- |**  *    *  * * **    *    * *  *  *  |
- |* *               *    **     **  *  *|
- |**  *   * * *  * ***  * ***  *        |
- |**      **    * *    *     *    *  * *|
- |** *  * * **   *****  **  *    ** *** |
- |**************************************|
- Secret Message: Engineered by Team Cryptids
- -------------------------------
- |* * * * * * * * * * * * * * *|
- |*                           *|
- |*********** ** **** ******** |
- |* ************* **** ********|
- |*       *    * *     ****  * |
- |* * **       *    *   *  *  *|
- |**** *** **    ** *     * *  |
- |* ** *  *   *       **     **|
- |** ** ** *   *  *** * *  * * |
- |*****************************|
+Secret Message: CSUMB CSIT online program is top notch.
+-------------------------------------------
+|* * * * * * * * * * * * * * * * * * * * *|
+|*                                       *|
+|****** **** ****** ******* ** *** *****  |
+|*     *    ******************************|
+|* **    * *        **  *    * * *   *    |
+|*   *    *  *****    *   * *   *  **  ***|
+|*  **     * *** **   **  *    **  ***  * |
+|***  * **   **  *   ****    *  *  ** * **|
+|*****  ***  *  * *   ** ** **  *   * *   |
+|*****************************************|
+Secret Message: You did it!  Great work.  Celebrate.
+----------------------------------------
+|* * * * * * * * * * * * * * * * * * * |
+|*                                    *|
+|**** *** **   ***** ****   *********  |
+|* ************ ************ **********|
+|** *      *    *  * * *         * *   |
+|***   *  *           * **    *      **|
+|* ** * *  *   * * * **  *   ***   *** |
+|* *           **    *****  *   **   **|
+|****  *  * *  * **  ** *   ** *  * *  |
+|**************************************|
+Secret Message: hello
+---------
+|* * * *|
+|*     *|
+|****** |
+|*******|
+|*      |
+|** ****|
+|* **** |
+|*    **|
+|* *  * |
+|*******|
+Secret Message: What a great resume builder this is!
+----------------------------------------
+|* * * * * * * * * * * * * * * * * * * |
+|*                                    *|
+|***** * ***** ****** ******* **** **  |
+|* ************************************|
+|**  *    *  * * **    *    * *  *  *  |
+|* *               *    **     **  *  *|
+|**  *   * * *  * ***  * ***  *        |
+|**      **    * *    *     *    *  * *|
+|** *  * * **   *****  **  *    ** *** |
+|**************************************|
+Secret Message: Engineered by Team Cryptids
+-------------------------------
+|* * * * * * * * * * * * * * *|
+|*                           *|
+|*********** ** **** ******** |
+|* ************* **** ********|
+|*       *    * *     ****  * |
+|* * **       *    *   *  *  *|
+|**** *** **    ** *     * *  |
+|* ** *  *   *       **     **|
+|** ** ** *   *  *** * *  * * |
+|*****************************|
  *****************END TEST OUTPUT**************************/
