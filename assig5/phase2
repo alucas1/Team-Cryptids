@@ -114,7 +114,7 @@ class CardTable extends JFrame
       pnlPlayArea.setBorder(new TitledBorder("Playing Area"));
       pnlHumanHand.setBorder(new TitledBorder("Your Hand"));
       
-      setLayout(new BorderLayout(20, 10));
+      setLayout(new BorderLayout(20, 20));
       add(pnlComputerHand, BorderLayout.NORTH);
       add(pnlPlayArea, BorderLayout.CENTER);
       add(pnlHumanHand, BorderLayout.SOUTH);
@@ -537,7 +537,7 @@ class Deck
 
    /** 
    Constructor that initializes all instance and class variables.
-   @param numPacks The amount of 52-card packs to initialize the deck with.
+   @param numPacks The amount of 56-card packs to initialize the deck with.
     */
    public Deck(int numPacks)
    {
@@ -564,23 +564,23 @@ class Deck
    Fills the 'cards' array with cards from the 'masterPack' array. If 
    numPacks creates an invalid number of cards, then initialize the 'cards' 
    array with the default numPacks = 1.
-   @param numPacks The amount of 52-card packs to initialize the deck with.
+   @param numPacks The amount of 56-card packs to initialize the deck with.
     */
    public void init(int numPacks)
    {
       // Ensures that amount of cards does not exceed MAX_CARDS or is negative.
-      if ((numPacks * 52) < 0 || (numPacks * 52) > MAX_CARDS )
+      if ((numPacks * 56) < 0 || (numPacks * 56) > MAX_CARDS )
       numPacks = 1;
    
       // Initializes cards array with numPacks amount of 52-card packs.
-      topCard = numPacks * 52; 
+      topCard = numPacks * 56; 
       cards = new Card[topCard];
 
       // Initializes cards in 'cards' array by copying valid cards .
       // from 'masterPack' array. 
       for (int i = 0; i < topCard; i++)
-         cards[i] = new Card(masterPack[(i % 52)].getValue(),
-               masterPack[(i % 52)].getSuit());
+         cards[i] = new Card(masterPack[(i % 56)].getValue(),
+               masterPack[(i % 56)].getSuit());
    }
 
    // Shuffles cards in array 'cards'.
@@ -638,7 +638,7 @@ class Deck
 
    /** 
    Helper method - Initializes masterPack array, a blueprint of a 
-   standard 52-card pack.
+   standard 56-card pack.
     */
    private static void allocateMasterPack()
    {
@@ -646,7 +646,7 @@ class Deck
       if (masterPack == null)
       {
          // Initialize masterPack
-         masterPack = new Card[52];
+         masterPack = new Card[56];
 
          // Initialize arrays for valid values and suites.
          char[] validValues = { 'X', 'K', 'Q', 'J', 'T',
