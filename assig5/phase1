@@ -45,7 +45,13 @@ public class Assig5 {
           icon[i] = new ImageIcon(sourceFolder + fileNames[i]);
    }
    
-   // turns 0 - 13 into "A", "2", "3", ... "Q", "K", "X"
+   /**
+    * Accepts a integer value and returns a string value corresponding to 
+    * the card's type
+    * 
+    * @param integer between 0 and 13 representing the card's value
+    * @return String representing the value of the card
+    */
    static String turnIntIntoCardValue(int k){
        // switch statement returns the coresponding card value based on the int k provided
        switch (k) {
@@ -84,7 +90,13 @@ public class Assig5 {
       return "ERROR";
    }
    
-   // turns 0 - 3 into "C", "D", "H", "S"
+   /**
+    * Accepts a integer value and returns a string value corresponding to 
+    * the card's suit
+    * 
+    * @param integer between 0 and 3 representing the card's suit
+    * @return String representing the suit of the card
+    */
    static String turnIntIntoCardSuit(int j){
       // switch statement returns the coresponding card value based on the int k provided
        switch (j) {
