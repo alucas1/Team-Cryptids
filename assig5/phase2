@@ -190,7 +190,7 @@ class GUICard
    static void loadCardIcons()
    {
       // Change IMGFOLDER to where the image folder is located
-      final String IMGFOLDER = "C:\\Users\\aguia\\Downloads\\images\\images\\";
+      final String IMGFOLDER = ".\\images\\";
       final String IMGSUFFIX = ".gif";
       
       // if Icons are already loaded then return
