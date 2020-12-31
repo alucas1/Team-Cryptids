@@ -2,7 +2,7 @@
 
 
 ## CST 338 - SOFTWARE DESIGN
-This repo contains the source files for our team projects. All projects are written in Java. The following projects were completed as part of this class:
+This repo contains the source files for our team projects (Team Cryptids). All projects are written in Java. The following projects were completed as part of this class:
 
  - **DecksOfCards:** Foundational classes required to create card games.
  - **BarcodeReader:** Reads a 2D array of binary data and transforms it into text (and vice versa).
